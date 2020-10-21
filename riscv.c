@@ -174,12 +174,11 @@ bool interpret(char* instr){
     printf("-> IMMEDIATE: %s\n", immediates[0]);
     int howMuch = atoi(immediates[0]);
         
-    //printf("sdfdfasf %d\n", converted);
-    int shifted = (xOut11 << howMuch);
-    printf("XOUT11: %ld\n", r[xOut11]);
-    write_address(shifted, 0x08, "mem.txt");
+    int shifted = (r[xOut11] << howMuch);
+    write_address(shifted, 0x10, "mem.txt");
     printf("-----------------> %s was replaced with : %d \n", firstReg[0], shifted);
   }
+  
   if(instru[0]=="SRLI"){
     secondRegImm[0] = token[2];
     immediates[0] = token[3];
