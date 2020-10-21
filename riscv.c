@@ -86,7 +86,6 @@ bool interpret(char* instr){
     return false;
   }
   //-------------------THE FIRST REGISTER WILL BE THE SECOND TOKEN----------------------
-  
   firstReg[0] = token[1];
   printf("-> DEST REGISTER: %s \n", firstReg[0]);
   char *xOut = strtok(firstReg[0], "X"); //still not tokenized
@@ -140,7 +139,7 @@ bool interpret(char* instr){
     if(instru[0] == "XOR"){ //XOR INSTRUCTION
       r[xOut2] = r[xOut4] ^ r[xOut7];; 
     }
-    write_address(r[xOut4], 0x30, "mem.txt");
+    write_address(r[xOut4], 0x20, "mem.txt");
 
     printf("-----------------> %s was replaced with : %ld \n", firstReg[0], r[xOut2]);
     printf("\n");
@@ -151,8 +150,15 @@ bool interpret(char* instr){
   if(instru[0] == "ADDI" || instru[0]== "SLLI" || instru[0]=="SRLI"){
     secondRegImm[0] = token[2];
     immediates[0] = token[3];
-    printf("-SECOND REGISTER %s\n", secondRegImm[0]);
-    printf("-IMMEDIATE: %s\n", immediates[0]);
+    printf("-> SECOND REGISTER %s\n", secondRegImm[0]);
+    char *xOut8= strtok(secondRegImm[0], "X"); //still not tokenized
+    int xOut9 = atoi(xOut8); //converts string to int
+    r[xOut9] = read_address(0x08, "mem.txt"); //taking whatever value
+    printf("------> This is what is in r[0x10]: %ld \n", r[xOut9]);
+    
+    printf("-> IMMEDIATE: %s\n", immediates[0]);
+    write_address(immediates[0], 0x20, "mem.txt");
+    printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
   }
   
   return true;
