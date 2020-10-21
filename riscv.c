@@ -98,14 +98,27 @@ bool interpret(char* instr){
     secReg = strtok(token[2], "("); //still not tokenized
     char *imm = secReg; //the immediate of the second register
     char *secondReg; //actual second register
-    
+    char *copySec;
     while(secReg != NULL){
       secondReg = secReg;
       secReg = strtok(NULL, "(");
     }
+    secondReg = strtok(secondReg, ")");
+    while(secondReg != NULL){
+      copySec = secondReg;
+      secondReg = strtok(NULL, ")");
+    }
     
     printf("-> IMMEDIATE FOR SECOND REGISTER: %s\n", imm);
-    printf("-> SECOND REGISTER: %s\n", secondReg);
+    printf("-> SECOND REGISTER: %s\n", copySec);
+    char *se = strtok(copySec, "X"); //still not tokenized
+    int toInt = atoi(se); //converts string to int
+    r[toInt] = read_address(0x08, "mem.txt"); //taking whatever value
+    printf("------> This is what is in r[0x08] is : %ld \n", r[toInt]);
+    int Immed = atoi(imm);
+    write_address(r[toInt+Immed], 0x20, "mem.txt");
+    
+
   } 
   //--------CHECKING IF INSTRUCTION IS   "ADD"  or  "AND"  or   "OR"  or   "XOR"----------------
   char *secondRegExtra[1];
@@ -160,7 +173,7 @@ bool interpret(char* instr){
     write_address(immediates[0], 0x20, "mem.txt");
     printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
   }
-  if(instru[0]== "SLLI"){
+  if(instru[0]== "SLLI" || instru[0] == "SRLI"){
     char *sec[1];
     sec[0] = token[2]; //REGISTER 2
     printf("-> SECOND REGISTER %s\n", sec[0]);
@@ -173,10 +186,16 @@ bool interpret(char* instr){
     immediates[0] = token[3];
     printf("-> IMMEDIATE: %s\n", immediates[0]);
     int howMuch = atoi(immediates[0]);
-        
-    int shifted = (r[xOut11] << howMuch);
-    write_address(shifted, 0x10, "mem.txt");
-    printf("-----------------> %s was replaced with : %d \n", firstReg[0], shifted);
+    char *new;
+    if(instru[0]== "SLLI"){
+      new = r[xOut11] << howMuch;
+    }
+    
+    if(instru[0] == "SRLI"){
+      new = r[xOut11] >> howMuch;
+    }
+    write_address(new, 0x10, "mem.txt");
+    printf("-----------------> %s was replaced with : %d \n", firstReg[0], new);
   }
   
   if(instru[0]=="SRLI"){
