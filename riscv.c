@@ -147,7 +147,7 @@ bool interpret(char* instr){
   //-------------------CHECKING IF INSTRUCTION IS   "ADDI"   or   "SLLI"   or   "SRLI" -----------
   char *immediates[1];
   char *secondRegImm[1];
-  if(instru[0] == "ADDI" || instru[0]== "SLLI" || instru[0]=="SRLI"){
+  if(instru[0] == "ADDI"){
     secondRegImm[0] = token[2];
     immediates[0] = token[3];
     printf("-> SECOND REGISTER %s\n", secondRegImm[0]);
@@ -160,7 +160,44 @@ bool interpret(char* instr){
     write_address(immediates[0], 0x20, "mem.txt");
     printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
   }
-  
+  if(instru[0]== "SLLI"){
+    secondRegImm[0] = token[1];
+    printf("-> FIRST REGISTER %s\n", secondRegImm[0]);
+    char *xOut8= strtok(secondRegImm[0], "X"); //still not tokenized
+    int xOut9 = atoi(xOut8); //converts string to int
+    r[xOut9] = read_address(0x00, "mem.txt"); //taking whatever value
+    printf("------> This is what is in r[0x00]: %ld \n", r[xOut9]);
+
+    char *sec[1];
+    sec[0] = token[2];
+    printf("-> SECOND REGISTER %s\n", sec[0]);
+    char *xOut10= strtok(sec[0], "X"); //still not tokenized
+    int xOut11 = atoi(xOut10); //converts string to int
+    r[xOut11] = read_address(0x08, "mem.txt"); //taking whatever value
+    printf("------> This is what is in r[0x08]: %ld \n", r[xOut11]);
+
+    char *immediates[1];
+    immediates[0] = token[3];
+    printf("-> IMMEDIATE: %s\n", immediates[0]);
+    int howMuch = atoi(immediates[0]);
+    int converted = atoi(sec[0]);
+    int shifted = converted << howMuch;
+    write_address(shifted, 0x10, "mem.txt");
+    printf("-----------------> %s was replaced with : %d \n", firstReg[0], shifted);
+  }
+  if(instru[0]=="SRLI"){
+    secondRegImm[0] = token[2];
+    immediates[0] = token[3];
+    printf("-> SECOND REGISTER %s\n", secondRegImm[0]);
+    char *xOut8= strtok(secondRegImm[0], "X"); //still not tokenized
+    int xOut9 = atoi(xOut8); //converts string to int
+    r[xOut9] = read_address(0x08, "mem.txt"); //taking whatever value
+    printf("------> This is what is in r[0x10]: %ld \n", r[xOut9]);
+    
+    printf("-> IMMEDIATE: %s\n", immediates[0]);
+    write_address(immediates[0], 0x20, "mem.txt");
+    printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
+  }
   return true;
 }
 
