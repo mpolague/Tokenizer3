@@ -140,7 +140,7 @@ bool interpret(char* instr){
     if(instru[0] == "XOR"){ //XOR INSTRUCTION
       r[xOut2] = r[xOut4] ^ r[xOut7];; 
     }
-    write_address(r[xOut4], 0x00, "mem.txt");
+    write_address(r[xOut4], 0x30, "mem.txt");
 
     printf("-----------------> %s was replaced with : %ld \n", firstReg[0], r[xOut2]);
     printf("\n");
