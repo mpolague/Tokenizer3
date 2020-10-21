@@ -176,6 +176,7 @@ bool interpret(char* instr){
         
     //printf("sdfdfasf %d\n", converted);
     int shifted = (xOut11 << howMuch);
+    printf("XOUT11: %ld\n", r[xOut11]);
     write_address(shifted, 0x08, "mem.txt");
     printf("-----------------> %s was replaced with : %d \n", firstReg[0], shifted);
   }
