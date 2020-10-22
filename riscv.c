@@ -8,6 +8,7 @@
 #define INPUT_LIM 50 //limit on how many characters a user can input
 
 int64_t* r; // Array of 32 64-bit registers
+int lines = 0;
 
 void init_regs();
 bool interpret(char* instr);
@@ -22,7 +23,7 @@ void init_regs(){
 	int reg_amount = 32;
 	r = malloc(reg_amount * sizeof(int64_t)); // 32 * 8 bytes
 	for(int i = 0; i < 32; i++){
-		r[i] = 0;
+	  r[i] = 0;
 	}
 }
 
@@ -31,14 +32,19 @@ void init_regs(){
  * Print out all of the contents that are inside of the registers.
  */
 void print_regs(){
-  int col_size = 0;
+  int col_size = 8;
   for(int i = 0; i < 8; i++){
-    printf("X%2i:%.*lld ", i, col_size, (long long int) r[i]);
-    printf("X%2i:%.*lld ", i+8, col_size, (long long int) r[i+8]);
-    printf("X%2i:%.*lld ", i+16, col_size, (long long int) r[i+16]);
-    printf("X%2i:%.*lld ", i+24, col_size, (long long int) r[i+24]);
+    printf("X%02i:%.*lld ", i, col_size, (long long int) r[i]);
+    printf("X%02i:%.*lld ", i+8, col_size, (long long int) r[i+8]);
+    printf("X%02i:%.*lld ", i+16, col_size, (long long int) r[i+16]);
+    printf("X%02i:%.*lld\n", i+24, col_size, (long long int) r[i+24]);
+
+    
+    //    printf("X%02i:%.lld ", i, col_size, (long long int) r[i]);
+    //    printf(" X%02i:%.lld ", i+8, col_size, (long long int) r[i+8]);
+    //    printf(" X%02i:%.lld ", i+16, col_size, (long long int) r[i+16]);
+    //    printf(" X%02i:%.lld\n ", i+24, col_size, (long long int) r[i+24]);
   }
-  printf("\n");
 }
 
 
@@ -90,8 +96,6 @@ bool interpret(char* instr){
   printf("-> DEST REGISTER: %s \n", firstReg[0]);
   char *xOut = strtok(firstReg[0], "X"); //still not tokenized
   int xOut2 = atoi(xOut); //converts string to int
-  r[xOut2] = read_address(0x00, "mem.txt"); //taking whatever value
-  printf("------> This is what is in r[0x00] is : %ld \n", r[xOut2]);
   
   //------------------CHECKING IF INSTR = LW or LD or SW or SW -------------------------
   if(instru[0] == "LW" || instru[0] == "LD" || instru[0] == "SW" || instru[0] =="SD"){
@@ -113,12 +117,36 @@ bool interpret(char* instr){
     printf("-> SECOND REGISTER: %s\n", copySec);
     char *se = strtok(copySec, "X"); //still not tokenized
     int toInt = atoi(se); //converts string to int
-    r[toInt] = read_address(0x08, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x08] is : %ld \n", r[toInt]);
+    //r[toInt] = read_address(0x08, "mem.txt"); //taking whatever value
     int Immed = atoi(imm);
-    write_address(r[toInt+Immed], 0x20, "mem.txt");
     
+    if(instru[0] == "LW"){
+      r[xOut2] = r[toInt]+Immed;
+      write_address(r[xOut2], lines, "mem.txt");
+    }
+    if(instru[0] == "LD"){
+      r[xOut2] = r[toInt]+Immed;
+      write_address(r[xOut2], lines, "mem.txt");
+    }
+    if(instru[0] == "SW"){
+      r[toInt] = r[toInt] + Immed;
+      r[toInt] = r[xOut2];
+      write_address(r[toInt], lines, "mem.txt");
+    }
+    if(instru[0] =="SD"){
+      r[toInt] = r[toInt] + Immed;
+      r[toInt] = r[xOut2];
+      write_address(r[toInt], lines, "mem.txt");
+    }
 
+    if(lines == 0 || lines%10 == 0){
+      //put this in like 0 by creating a variable "0x" then add 08
+      lines = lines + 8;
+    }else{
+      //increment lines + 10
+      lines = lines + 10;
+    }
+    
   } 
   //--------CHECKING IF INSTRUCTION IS   "ADD"  or  "AND"  or   "OR"  or   "XOR"----------------
   char *secondRegExtra[1];
@@ -129,16 +157,12 @@ bool interpret(char* instr){
     printf("-> SECOND REGISTER: %s\n", secondRegExtra[0]);
     char *xOut3 = strtok(secondRegExtra[0], "X"); //still not tokenized
     int xOut4 = atoi(xOut3); //converts string to int
-    r[xOut4] = read_address(0x08, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x08] is : %ld \n", r[xOut4]);
    
     thirdRegExtra[0] = token[3];
     printf("-> THIRD REGISTER: %s\n", thirdRegExtra[0]);
     char *xOut6;
     xOut6 = strtok(thirdRegExtra[0], "X"); //still not tokenized
     int xOut7 = atoi(xOut6); //converts string to int
-    r[xOut7] = read_address(0x10, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x10] is : %ld \n", r[xOut7]);
     
     if(instru[0] == "ADD"){
       r[xOut2] = r[xOut4] + r[xOut7]; //ADD INSTRUCTION
@@ -147,14 +171,20 @@ bool interpret(char* instr){
       r[xOut2] = r[xOut4] & r[xOut7]; 
     }
     if(instru[0] == "OR"){ //OR INSTRUCTION
-      r[xOut2] = r[xOut4] | r[xOut7];; 
+      r[xOut2] = r[xOut4] | r[xOut7]; 
     }
     if(instru[0] == "XOR"){ //XOR INSTRUCTION
-      r[xOut2] = r[xOut4] ^ r[xOut7];; 
+      r[xOut2] = r[xOut4] ^ r[xOut7];
     }
-    write_address(r[xOut4], 0x20, "mem.txt");
-
-    printf("-----------------> %s was replaced with : %ld \n", firstReg[0], r[xOut2]);
+    write_address(r[xOut2], lines, "mem.txt");
+    
+    if(lines == 0 || lines%10 == 0){
+      //put this in like 0 by creating a variable "0x" then add 08
+      lines = lines + 8;
+    }else{
+      //increment lines + 10
+      lines = lines + 10;
+    }
     printf("\n");
   }
   //-------------------CHECKING IF INSTRUCTION IS   "ADDI"   or   "SLLI"   or   "SRLI" -----------
@@ -166,50 +196,51 @@ bool interpret(char* instr){
     printf("-> SECOND REGISTER %s\n", secondRegImm[0]);
     char *xOut8= strtok(secondRegImm[0], "X"); //still not tokenized
     int xOut9 = atoi(xOut8); //converts string to int
-    r[xOut9] = read_address(0x08, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x10]: %ld \n", r[xOut9]);
     
     printf("-> IMMEDIATE: %s\n", immediates[0]);
-    write_address(immediates[0], 0x20, "mem.txt");
-    printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
-  }
+    //write_address(immediates[0], 0x20, "mem.txt");
+    r[xOut9] = atoi(immediates[0]);
+    write_address(r[xOut9], lines, "mem.txt");
+    
+    if(lines == 0 || lines%10 == 0){
+      //put this in like 0 by creating a variable "0x" then add 08
+      lines = lines + 8;
+    }else{
+      //increment lines + 10
+      lines = lines + 10;
+    }
+
+  } //---------------------------------------------------------------
   if(instru[0]== "SLLI" || instru[0] == "SRLI"){
     char *sec[1];
     sec[0] = token[2]; //REGISTER 2
     printf("-> SECOND REGISTER %s\n", sec[0]);
     char *xOut10= strtok(sec[0], "X"); //still not tokenized
     int xOut11 = atoi(xOut10); //converts string to int
-    r[xOut11] = read_address(0x08, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x08]: %ld \n", r[xOut11]);
-
+    
     char *immediates[1];
     immediates[0] = token[3];
     printf("-> IMMEDIATE: %s\n", immediates[0]);
     int howMuch = atoi(immediates[0]);
     char *new;
     if(instru[0]== "SLLI"){
-      new = r[xOut11] << howMuch;
+      r[xOut2] = r[xOut11] << howMuch;
     }
     
     if(instru[0] == "SRLI"){
-      new = r[xOut11] >> howMuch;
+      r[xOut2] = r[xOut11] >> howMuch;
     }
-    write_address(new, 0x10, "mem.txt");
-    printf("-----------------> %s was replaced with : %d \n", firstReg[0], new);
-  }
-  
-  if(instru[0]=="SRLI"){
-    secondRegImm[0] = token[2];
-    immediates[0] = token[3];
-    printf("-> SECOND REGISTER %s\n", secondRegImm[0]);
-    char *xOut8= strtok(secondRegImm[0], "X"); //still not tokenized
-    int xOut9 = atoi(xOut8); //converts string to int
-    r[xOut9] = read_address(0x08, "mem.txt"); //taking whatever value
-    printf("------> This is what is in r[0x10]: %ld \n", r[xOut9]);
     
-    printf("-> IMMEDIATE: %s\n", immediates[0]);
-    write_address(immediates[0], 0x20, "mem.txt");
-    printf("-----------------> %s was replaced with : %ld \n", firstReg[0], immediates[0]);
+    write_address(r[xOut2], lines, "mem.txt");
+    
+    if(lines == 0 || lines%10 == 0){
+      //put this in like 0 by creating a variable "0x" then add 08
+      lines = lines + 8;
+    }else{
+      //increment lines + 10
+      lines = lines + 10;
+    }
+
   }
   return true;
 }
@@ -250,19 +281,7 @@ int main(){
   char user_input[INPUT_LIM]; 
   //will ask for user input until they enter ctrl+D
   init_regs(); //DO NOT REMOVE THIS LINE
-  //----THIS IS HOW WE ACCESS DATA FROM THE MEM.TXT AND OVERWRITE IT AS WELL----
-  //int64_t data = 0xFFF;
-  //int64_t address = 0x20;
-  //char* fileName = "mem.txt";
-  //write_read_demo(data, address, fileName);
-  
-  //----THIS IS HOW YOU GET THE ADDRESSES OF THE REGISTER ARRAY AND ITS ELEMENTS----
-  //printf("------\n");
-  //r[0] = 3;
-  //printf("ZERO %ld \n",r[0]);
-  //printf("second %ld \n", r[1]);
-  //printf("------");
-  
+
   while(1){
     printf("-> Enter an instruction or use ctrl+D on windows to exit the program\n");
     printf("$ ");
