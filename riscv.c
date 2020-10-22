@@ -105,9 +105,9 @@ bool interpret(char* instr){
     char *copySec;
     while(secReg != NULL){
       secondReg = secReg;
-      secReg = strtok(NULL, "(");
+      secReg = strtok(NULL, "("); //takes away )
     }
-    secondReg = strtok(secondReg, ")");
+    secondReg = strtok(secondReg, ")"); //takes away )
     while(secondReg != NULL){
       copySec = secondReg;
       secondReg = strtok(NULL, ")");
@@ -120,21 +120,21 @@ bool interpret(char* instr){
     int Immed = atoi(imm);
     
     if(instru[0] == "LW"){
-      r[xOut2] = r[toInt]+Immed;
+      r[xOut2] = r[toInt]+Immed; //performing instruction
       write_address(r[xOut2], lines, "mem.txt");
     }
     if(instru[0] == "LD"){
-      r[xOut2] = r[toInt]+Immed;
+      r[xOut2] = r[toInt]+Immed; //performing instruction
       write_address(r[xOut2], lines, "mem.txt");
     }
     if(instru[0] == "SW"){
       r[toInt] = r[toInt] + Immed;
-      r[toInt] = r[xOut2];
+      r[toInt] = r[xOut2]; //performing instruction
       write_address(r[toInt], lines, "mem.txt");
     }
     if(instru[0] =="SD"){
       r[toInt] = r[toInt] + Immed;
-      r[toInt] = r[xOut2];
+      r[toInt] = r[xOut2]; //performing instruction
       write_address(r[toInt], lines, "mem.txt");
     }
 
@@ -223,11 +223,11 @@ bool interpret(char* instr){
     int howMuch = atoi(immediates[0]);
     char *new;
     if(instru[0]== "SLLI"){
-      r[xOut2] = r[xOut11] << howMuch;
+      r[xOut2] = r[xOut11] << howMuch; //performing instruction
     }
     
     if(instru[0] == "SRLI"){
-      r[xOut2] = r[xOut11] >> howMuch;
+      r[xOut2] = r[xOut11] >> howMuch; //performing instruction
     }
     
     write_address(r[xOut2], lines, "mem.txt");
