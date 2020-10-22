@@ -117,7 +117,6 @@ bool interpret(char* instr){
     printf("-> SECOND REGISTER: %s\n", copySec);
     char *se = strtok(copySec, "X"); //still not tokenized
     int toInt = atoi(se); //converts string to int
-    //r[toInt] = read_address(0x08, "mem.txt"); //taking whatever value
     int Immed = atoi(imm);
     
     if(instru[0] == "LW"){
